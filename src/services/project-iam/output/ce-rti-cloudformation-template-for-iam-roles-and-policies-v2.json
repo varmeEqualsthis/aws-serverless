@@ -1,0 +1,1436 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "template for creating roles and policies for ce-rti project",
+  "Resources": {
+    "ProjectAdminRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-admin-role",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AWSSupportAccess",
+          "arn:aws:iam::aws:policy/SecurityAudit",
+          "arn:aws:iam::aws:policy/CloudWatchEventsReadOnlyAccess"
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "arn:aws:iam::974928271669:root"
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectAdminPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-admin-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectAdminRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowIamReadAccess",
+              "Action": [
+                "iam:Get*",
+                "iam:List*",
+                "iam:PassRole"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowTagReadAccess",
+              "Action": [
+                "tag:Get*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowUserToSeeBucketListInTheConsole",
+              "Action": [
+                "s3:ListAllMyBuckets",
+                "s3:GetBucketLocation"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::*"
+              ]
+            },
+            {
+              "Sid": "AllowListingOfUserFolder",
+              "Action": [
+                "s3:ListBucket",
+                "s3:GetBucketLocation"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:s3:::ce-rti-*"
+              ],
+              "Condition": {
+                "StringLike": {
+                  "s3:prefix": [
+                    "arn:aws:s3:::ce-rti-*"
+                  ]
+                }
+              }
+            },
+            {
+              "Sid": "AllowAllS3ActionsInUserFolder",
+              "Effect": "Allow",
+              "Action": [
+                "s3:*"
+              ],
+              "Resource": [
+                "arn:aws:s3:::ce-rti-*"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cloudformation:List*",
+                "cloudformation:Describe*",
+                "cloudformation:Get*",
+                "cloudformation:Preview*",
+                "cloudformation:Validate*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cloudformation:*"
+              ],
+              "Resource": [
+                "arn:aws:cloudformation:*:*:stack/ce-rti*/*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchLogsReadAccess",
+              "Action": [
+                "logs:Get*",
+                "logs:Describe*",
+                "logs:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchLogsActionsForUser",
+              "Action": [
+                "logs:*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:logs:*:*:log-group:/aws/lambda/ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchReadAccess",
+              "Action": [
+                "cloudwatch:Get*",
+                "cloudwatch:Describe*",
+                "cloudwatch:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchActionsForUser",
+              "Action": [
+                "cloudwatch:*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:cloudwatch:*:*:alarm:ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchEventsReadAccess",
+              "Action": [
+                "events:Describe*",
+                "events:List*",
+                "events:Test*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchEventsAccessForUser",
+              "Action": "events:*",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:events:*:*:rule/ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowSNSReadAccess",
+              "Action": [
+                "sns:Get*",
+                "sns:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllSNSActionsForUser",
+              "Action": [
+                "sns:*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:sns:*:*:ce-rti-*",
+                "arn:aws:sns:*:*:dynamodb"
+              ]
+            },
+            {
+              "Sid": "AllowSQSReadAccess",
+              "Action": [
+                "sqs:Get*",
+                "sqs:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllSQSActionsForUser",
+              "Action": [
+                "sqs:*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:sqs:*:*:ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowKMSReadAccess",
+              "Action": [
+                "kms:Describe*",
+                "kms:Get*",
+                "kms:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowLambdaReadAccess",
+              "Action": [
+                "lambda:Get*",
+                "lambda:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllLambdaActionsForUser",
+              "Action": [
+                "lambda:*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:lambda:*:*:function:ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowLambdaCreateEventSourceMapping",
+              "Action": [
+                "lambda:CreateEventSourceMapping",
+                "lambda:DeleteEventSourceMapping"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllStatesReadAccess",
+              "Action": [
+                "states:Get*",
+                "states:List*",
+                "states:Describe*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllStatesActionsForUser",
+              "Action": [
+                "states:*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:states:*:*:*:ce-rti*"
+              ]
+            },
+            {
+              "Sid": "AllowNonResourceLeveStatesActionsForUser",
+              "Action": [
+                "states:CreateActivity",
+                "states:CreateStateMachine",
+                "states:SendTaskFailure",
+                "states:SendTaskHeartbeat",
+                "states:SendTaskSuccess",
+                "states:StopExecution"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowDynamodbReadAccess",
+              "Action": [
+                "dynamodb:Describe*",
+                "dynamodb:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllDynamodbActionsForUser",
+              "Action": [
+                "dynamodb:*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowAllApigateway",
+              "Effect": "Allow",
+              "Action": [
+                "apigateway:*"
+              ],
+              "Resource": [
+                "arn:aws:apigateway:*::*",
+                "arn:aws:apigateway:*::/*"
+              ]
+            },
+            {
+              "Sid": "AllowAllApigatewayExecuteApi",
+              "Effect": "Allow",
+              "Action": [
+                "execute-api:*"
+              ],
+              "Resource": [
+                "arn:aws:execute-api:*:*:*"
+              ]
+            },
+            {
+              "Sid": "AllowCognitoReadAccess",
+              "Effect": "Allow",
+              "Action": [
+                "cognito-idp:List*",
+                "cognito-idp:Describe*",
+                "cognito-idp:Get*"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowKinesisReadAccess",
+              "Effect": "Allow",
+              "Action": [
+                "kinesis:List*",
+                "kinesis:Describe*",
+                "kinesis:Get*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllKinesisActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "kinesis:*"
+              ],
+              "Resource": [
+                "arn:aws:kinesis:*:*:stream/ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowKinesisFirehoseReadAccess",
+              "Effect": "Allow",
+              "Action": [
+                "firehose:List*",
+                "firehose:Describe*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllKinesisFirehoseActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "firehose:*"
+              ],
+              "Resource": [
+                "arn:aws:firehose:*:*:deliverystream/ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowAllSTSActions",
+              "Effect": "Allow",
+              "Action": [
+                "sts:*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllSSMParameterActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "ssm:DescribeParameters",
+                "ssm:PutParameter",
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:DeleteParameter",
+                "ssm:DeleteParameters",
+                "ssm:GetParametersByPath"
+              ],
+              "Resource": [
+                "arn:aws:ssm:*:*:parameter/ce-rti-*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ProjectSupportRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-support-role",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AWSSupportAccess"
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "arn:aws:iam::974928271669:root"
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectSupportPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-support-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectSupportRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "states:List*",
+                "logs:Describe*",
+                "logs:List*",
+                "logs:GetLogEvents",
+                "dynamodb:List*",
+                "logs:TestMetricFilter",
+                "logs:FilterLogEvents"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "states:Get*",
+                "dynamodb:Get*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "states:Describe*"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/ce-rti*",
+                "arn:aws:states:*:*:execution:ce-rti*:*",
+                "arn:aws:states:*:*:activity:ce-rti*",
+                "arn:aws:states:*:*:stateMachine:ce-rti*"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": "dynamodb:Describe*",
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/ce-rti*"
+              ]
+            },
+            {
+              "Sid": "AllowReadSSMParameterActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "ssm:DescribeParameters",
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath"
+              ],
+              "Resource": [
+                "arn:aws:ssm:*:*:parameter/ce-rti-*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ProjectLambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-lambda-role",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectLambdaPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-lambda-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectLambdaRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowIamReadAccess",
+              "Action": [
+                "iam:Get*",
+                "iam:List*",
+                "iam:PassRole"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowTagReadAccess",
+              "Action": [
+                "tag:Get*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchLogsReadAccess",
+              "Action": [
+                "logs:Get*",
+                "logs:Describe*",
+                "logs:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchLogsActionsForUser",
+              "Action": [
+                "logs:Create*",
+                "logs:Put*",
+                "logs:Tag*",
+                "logs:untag*",
+                "logs:Filter*",
+                "logs:Associate*",
+                "logs:Test*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:logs:*:*:log-group:/aws/lambda/ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowAllS3ActionsInUserFolder",
+              "Effect": "Allow",
+              "Action": [
+                "s3:*"
+              ],
+              "Resource": [
+                "arn:aws:s3:::ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudFormationReadAccess",
+              "Effect": "Allow",
+              "Action": [
+                "cloudformation:List*",
+                "cloudformation:Describe*",
+                "cloudformation:Get*",
+                "cloudformation:Preview*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchReadAccess",
+              "Action": [
+                "cloudwatch:Get*",
+                "cloudwatch:Describe*",
+                "cloudwatch:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchEventsReadAccess",
+              "Action": [
+                "events:Describe*",
+                "events:List*",
+                "events:Test*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowCloudWatchEventsAccess",
+              "Action": "events:*",
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:events:*:*:rule/ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowLambdaSNSActionsForUser",
+              "Action": [
+                "sns:Get*",
+                "sns:List*",
+                "sns:Subscribe",
+                "sns:Unsubscribe",
+                "sns:Publish"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:sns:*:*:ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowLambdaSQSActionsForUser",
+              "Action": [
+                "sqs:Purge*",
+                "sqs:Send*",
+                "sqs:List*",
+                "sqs:Get*",
+                "sqs:Receive*",
+                "sqs:DeleteMessage",
+                "sqs:Get*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:sqs:*:*:ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowLambdaReadAccess",
+              "Action": [
+                "lambda:Get*",
+                "lambda:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllLambdaInvokeForUser",
+              "Action": [
+                "lambda:Invoke*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:lambda:*:*:function:ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowDynamodbReadAccess",
+              "Action": [
+                "dynamodb:Describe*",
+                "dynamodb:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowAllDynamodbActionsForUser",
+              "Action": [
+                "dynamodb:Query*",
+                "dynamodb:DeleteItem",
+                "dynamodb:Get*",
+                "dynamodb:Batch*",
+                "dynamodb:UpdateItem",
+                "dynamodb:Scan",
+                "dynamodb:PutItem"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:dynamodb:*:*:table/ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowExecuteAndReadStatesActionsForUser",
+              "Action": [
+                "states:Describe*",
+                "states:Get*",
+                "states:List*",
+                "states:Start*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                "arn:aws:states:*:*:*:ce-rti*"
+              ]
+            },
+            {
+              "Sid": "AllowKinesisReadAccess",
+              "Effect": "Allow",
+              "Action": [
+                "kinesis:List*",
+                "kinesis:Describe*",
+                "kinesis:Get*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Sid": "AllowReadPutKinesisActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "kinesis:Describe*",
+                "kinesis:Get*",
+                "kinesis:List*",
+                "kinesis:Put*"
+              ],
+              "Resource": [
+                "arn:aws:kinesis:*:*:stream/ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowReadSSMParameterActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "ssm:DescribeParameters",
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath"
+              ],
+              "Resource": [
+                "arn:aws:ssm:*:*:parameter/ce-rti-*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ProjectStepfunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-stepfunction-role",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com"
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectStepfunctionPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-stepfunction-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectStepfunctionRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "lambda:Invoke*"
+              ],
+              "Resource": [
+                "arn:aws:lambda:*:*:function:ce-rti-*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ProjectFirehoseRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-firehose-role",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "firehose.amazonaws.com"
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectFirehosePolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-firehose-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectFirehoseRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowAllS3ActionsInUserFolder",
+              "Effect": "Allow",
+              "Action": [
+                "s3:*"
+              ],
+              "Resource": [
+                "arn:aws:s3:::ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowReadAndInvokeLambdaActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "lambda:Invoke*",
+                "lambda:Get*"
+              ],
+              "Resource": [
+                "arn:aws:lambda:*:*:function:ce-rti-*"
+              ]
+            },
+            {
+              "Sid": "AllowReadKinesisActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "kinesis:Describe*",
+                "kinesis:Get*"
+              ],
+              "Resource": [
+                "arn:aws:kinesis:*:*:stream/ce-rti-*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ProjectApiGatewayRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-api-gateway-role",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectApiGatewayPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-api-gateway-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectApiGatewayRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents",
+                "logs:GetLogEvents",
+                "logs:FilterLogEvents"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowInvokeLambdaActionsForUser",
+              "Effect": "Allow",
+              "Action": "lambda:Invoke*",
+              "Resource": [
+                "arn:aws:lambda:*:*:function:ce-rti-*"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "states:Send*",
+                "states:List*",
+                "states:Create*",
+                "states:StopExecution"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": "states:*",
+              "Resource": [
+                "arn:aws:states:*:*:activity:*",
+                "arn:aws:states:*:*:execution:ce-rti*",
+                "arn:aws:states:*:*:stateMachine:ce-rti*"
+              ]
+            },
+            {
+              "Sid": "AllowReadSSMParameterActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "ssm:DescribeParameters",
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath"
+              ],
+              "Resource": [
+                "arn:aws:ssm:*:*:parameter/ce-rti-*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ProjectDataPipelineRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-datapipeline-role",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSDataPipelineRole"
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "datapipeline.amazonaws.com",
+                  "elasticmapreduce.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectDataPipelinePolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-datapipeline-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectDataPipelineRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cloudwatch:*",
+                "datapipeline:DescribeObjects",
+                "datapipeline:EvaluateExpression",
+                "dynamodb:BatchGetItem",
+                "dynamodb:DescribeTable",
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:UpdateTable",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:CancelSpotInstanceRequests",
+                "ec2:CreateSecurityGroup",
+                "ec2:CreateTags",
+                "ec2:DeleteTags",
+                "ec2:Describe*",
+                "ec2:ModifyImageAttribute",
+                "ec2:ModifyInstanceAttribute",
+                "ec2:RequestSpotInstances",
+                "ec2:RunInstances",
+                "ec2:StartInstances",
+                "ec2:StopInstances",
+                "ec2:TerminateInstances",
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:DeleteSecurityGroup",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:CreateNetworkInterface",
+                "ec2:DeleteNetworkInterface",
+                "ec2:DetachNetworkInterface",
+                "elasticmapreduce:*",
+                "iam:GetInstanceProfile",
+                "iam:GetRole",
+                "iam:GetRolePolicy",
+                "iam:ListAttachedRolePolicies",
+                "iam:ListRolePolicies",
+                "iam:ListInstanceProfiles",
+                "iam:PassRole",
+                "rds:DescribeDBInstances",
+                "rds:DescribeDBSecurityGroups",
+                "redshift:DescribeClusters",
+                "redshift:DescribeClusterSecurityGroups",
+                "s3:CreateBucket",
+                "s3:DeleteObject",
+                "s3:Get*",
+                "s3:List*",
+                "s3:Put*",
+                "sdb:BatchPutAttributes",
+                "sdb:Select*",
+                "sns:GetTopicAttributes",
+                "sns:ListTopics",
+                "sns:Publish",
+                "sns:Subscribe",
+                "sns:Unsubscribe",
+                "sqs:CreateQueue",
+                "sqs:Delete*",
+                "sqs:GetQueue*",
+                "sqs:PurgeQueue",
+                "sqs:ReceiveMessage"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": "iam:CreateServiceLinkedRole",
+              "Resource": "*",
+              "Condition": {
+                "StringLike": {
+                  "iam:AWSServiceName": [
+                    "elasticmapreduce.amazonaws.com",
+                    "spot.amazonaws.com"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ProjectDataPipelineResourceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-datapipeline-resource-role",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforDataPipelineRole"
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectDataPipelineResourcePolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-datapipeline-resource-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectDataPipelineResourceRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "cloudwatch:*",
+                "datapipeline:*",
+                "dynamodb:*",
+                "ec2:Describe*",
+                "elasticmapreduce:AddJobFlowSteps",
+                "elasticmapreduce:Describe*",
+                "elasticmapreduce:ListInstance*",
+                "elasticmapreduce:ModifyInstanceGroups",
+                "rds:Describe*",
+                "redshift:DescribeClusters",
+                "redshift:DescribeClusterSecurityGroups",
+                "s3:*",
+                "sdb:*",
+                "sns:*",
+                "sqs:*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ProjectEmrRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-emr-role",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole"
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "elasticmapreduce.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectEmrPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-emr-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectEmrRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Resource": "*",
+              "Action": [
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:CancelSpotInstanceRequests",
+                "ec2:CreateNetworkInterface",
+                "ec2:CreateSecurityGroup",
+                "ec2:CreateTags",
+                "ec2:DeleteNetworkInterface",
+                "ec2:DeleteSecurityGroup",
+                "ec2:DeleteTags",
+                "ec2:DescribeAvailabilityZones",
+                "ec2:DescribeAccountAttributes",
+                "ec2:DescribeDhcpOptions",
+                "ec2:DescribeImages",
+                "ec2:DescribeInstanceStatus",
+                "ec2:DescribeInstances",
+                "ec2:DescribeKeyPairs",
+                "ec2:DescribeNetworkAcls",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DescribePrefixLists",
+                "ec2:DescribeRouteTables",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSpotInstanceRequests",
+                "ec2:DescribeSpotPriceHistory",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeTags",
+                "ec2:DescribeVpcAttribute",
+                "ec2:DescribeVpcEndpoints",
+                "ec2:DescribeVpcEndpointServices",
+                "ec2:DescribeVpcs",
+                "ec2:DetachNetworkInterface",
+                "ec2:ModifyImageAttribute",
+                "ec2:ModifyInstanceAttribute",
+                "ec2:RequestSpotInstances",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:RunInstances",
+                "ec2:TerminateInstances",
+                "ec2:DeleteVolume",
+                "ec2:DescribeVolumeStatus",
+                "ec2:DescribeVolumes",
+                "ec2:DetachVolume",
+                "iam:GetRole",
+                "iam:GetRolePolicy",
+                "iam:ListInstanceProfiles",
+                "iam:ListRolePolicies",
+                "iam:PassRole",
+                "s3:CreateBucket",
+                "s3:Get*",
+                "s3:List*",
+                "sdb:BatchPutAttributes",
+                "sdb:Select",
+                "sqs:CreateQueue",
+                "sqs:Delete*",
+                "sqs:GetQueue*",
+                "sqs:PurgeQueue",
+                "sqs:ReceiveMessage",
+                "cloudwatch:PutMetricAlarm",
+                "cloudwatch:DescribeAlarms",
+                "cloudwatch:DeleteAlarms",
+                "application-autoscaling:RegisterScalableTarget",
+                "application-autoscaling:DeregisterScalableTarget",
+                "application-autoscaling:PutScalingPolicy",
+                "application-autoscaling:DeleteScalingPolicy",
+                "application-autoscaling:Describe*"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": "iam:CreateServiceLinkedRole",
+              "Resource": "arn:aws:iam::*:role/aws-service-role/spot.amazonaws.com/AWSServiceRoleForEC2Spot*",
+              "Condition": {
+                "StringLike": {
+                  "iam:AWSServiceName": "spot.amazonaws.com"
+                }
+              }
+            },
+            {
+              "Sid": "AllowReadSSMParameterActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "ssm:DescribeParameters",
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath"
+              ],
+              "Resource": [
+                "arn:aws:ssm:*:*:parameter/ce-rti-*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "ProjectEmrEc2Role": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "ce-rti-emr-ec2-role",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role"
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2008-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "ProjectEmrEc2Policy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "ce-rti-emr-ec2-policy",
+        "Roles": [
+          {
+            "Ref": "ProjectEmrEc2Role"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Resource": "*",
+              "Action": [
+                "cloudwatch:*",
+                "dynamodb:*",
+                "ec2:Describe*",
+                "elasticmapreduce:Describe*",
+                "elasticmapreduce:ListBootstrapActions",
+                "elasticmapreduce:ListClusters",
+                "elasticmapreduce:ListInstanceGroups",
+                "elasticmapreduce:ListInstances",
+                "elasticmapreduce:ListSteps",
+                "kinesis:CreateStream",
+                "kinesis:DeleteStream",
+                "kinesis:DescribeStream",
+                "kinesis:GetRecords",
+                "kinesis:GetShardIterator",
+                "kinesis:MergeShards",
+                "kinesis:PutRecord",
+                "kinesis:SplitShard",
+                "rds:Describe*",
+                "s3:*",
+                "sdb:*",
+                "sns:*",
+                "sqs:*",
+                "glue:CreateDatabase",
+                "glue:UpdateDatabase",
+                "glue:DeleteDatabase",
+                "glue:GetDatabase",
+                "glue:GetDatabases",
+                "glue:CreateTable",
+                "glue:UpdateTable",
+                "glue:DeleteTable",
+                "glue:GetTable",
+                "glue:GetTables",
+                "glue:GetTableVersions",
+                "glue:CreatePartition",
+                "glue:BatchCreatePartition",
+                "glue:UpdatePartition",
+                "glue:DeletePartition",
+                "glue:BatchDeletePartition",
+                "glue:GetPartition",
+                "glue:GetPartitions",
+                "glue:BatchGetPartition",
+                "glue:CreateUserDefinedFunction",
+                "glue:UpdateUserDefinedFunction",
+                "glue:DeleteUserDefinedFunction",
+                "glue:GetUserDefinedFunction",
+                "glue:GetUserDefinedFunctions"
+              ]
+            },
+            {
+              "Sid": "AllowReadSSMParameterActionsForUser",
+              "Effect": "Allow",
+              "Action": [
+                "ssm:DescribeParameters",
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath"
+              ],
+              "Resource": [
+                "arn:aws:ssm:*:*:parameter/ce-rti-*"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {}
+}

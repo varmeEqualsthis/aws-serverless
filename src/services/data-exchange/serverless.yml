@@ -1,0 +1,44 @@
+service: ${self:custom.prefix}-med-info-data-exchng
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  memorySize: 128
+  stage: ${opt:stage, self:custom.defaultStage}
+  role: ${file(../../resources/provider.js):project.lambdaRole}
+  apiKeys:
+    - ${self:custom.pre}
+  environment:
+    stage: ${self:provider.stage}
+  stackTags: ${file(../../resources/standard-tags.yml)}
+
+plugins:  
+  - serverless-webpack
+  - serverless-pseudo-parameters
+
+custom:
+  defaultStage: dev
+  pre: ${self:service}-${self:provider.stage}
+  prefix: ${file(../../resources/provider.js):project.prefix}
+
+  serviceBucketName: ${self:custom.pre}
+  serviceBucketArn: arn:aws:s3:::${self:custom.serviceBucketName}
+
+  exportDataPipelineName: ${self:custom.pre}-export
+  
+functions:
+  runDataPipelineHiveScript:
+    handler: handler.runDataPipelineHiveScript
+  
+resources:
+  Resources:
+
+    ExportDataPipeline:
+      Type: AWS::DataPipeline::Pipeline
+      Properties:
+        Name: ${self:custom.exportDataPipelineName}
+        Description: "Pipeline to export data"
+        Activate: false
+        PipelineObjects: ${file(variables.js):datapipelines.hive-script.pipelineObjects}
+        ParameterObjects: ${file(variables.js):datapipelines.hive-script.parameterObjects}
+        ParameterValues: ${file(variables.js):datapipelines.hive-script.parameterValues}

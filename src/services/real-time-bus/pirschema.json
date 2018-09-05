@@ -1,0 +1,194 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "PIR",
+  "required": ["data"],
+  "properties": {
+    "data": {
+      "$id": "#/properties/data",
+      "type": "array",
+      "title": "The Data Schema",
+      "items": {
+        "$id": "#/properties/data/items",
+        "type": "object",
+        "title": "The PIR Items Schema",
+        "required": [
+          "send_email",
+          "req_date_utc",
+          "rep_lastname",
+          "rep_firstname",
+          "question_product_code",
+          "question",
+          "pir_status_code",
+          "external_req_id",
+          "external_rep_id",
+          "create_letter",
+          "contact_salutation",
+          "contact_phone1",
+          "contact_lastname",
+          "contact_firstname",
+          "contact_degree",
+          "case_source",
+          "case_language",
+          "case_handling",
+          "case_department"
+        ],
+        "properties": {
+          "send_email": {
+            "$id": "#/properties/data/items/properties/send_email",
+            "type": "string",
+            "title": "The Send_email Schema",
+            "default": "",
+            "examples": ["Y"],
+            "pattern": "^(.*)$"
+          },
+          "req_date_utc": {
+            "$id": "#/properties/data/items/properties/req_date_utc",
+            "type": "string",
+            "title": "The Req_date_utc Schema",
+            "default": "",
+            "examples": ["2018-08-12T11:30:00.000Z"],
+            "pattern": "^(.*)$"
+          },
+          "rep_lastname": {
+            "$id": "#/properties/data/items/properties/rep_lastname",
+            "type": "string",
+            "title": "The Rep_lastname Schema",
+            "default": "",
+            "examples": ["User"],
+            "pattern": "^(.*)$"
+          },
+          "rep_firstname": {
+            "$id": "#/properties/data/items/properties/rep_firstname",
+            "type": "string",
+            "title": "The Rep_firstname Schema",
+            "default": "",
+            "examples": ["Integration"],
+            "pattern": "^(.*)$"
+          },
+          "question_product_code": {
+            "$id": "#/properties/data/items/properties/question_product_code",
+            "type": "string",
+            "title": "The Question_product_code Schema",
+            "default": "",
+            "examples": ["GARDASIL"],
+            "pattern": "^(.*)$"
+          },
+          "question": {
+            "$id": "#/properties/data/items/properties/question",
+            "type": "string",
+            "title": "The Question Schema",
+            "default": "",
+            "examples": ["test request updated"],
+            "pattern": "^(.*)$"
+          },
+          "pir_status_code": {
+            "$id": "#/properties/data/items/properties/pir_status_code",
+            "type": "string",
+            "title": "The Pir_status_code Schema",
+            "default": "",
+            "examples": ["TRANSFERRED"],
+            "pattern": "^(.*)$"
+          },
+          "external_req_id": {
+            "$id": "#/properties/data/items/properties/external_req_id",
+            "type": "string",
+            "title": "The External_req_id Schema",
+            "default": "",
+            "examples": ["a0tq0000003FiDTAA0"],
+            "pattern": "^(.*)$"
+          },
+          "external_rep_id": {
+            "$id": "#/properties/data/items/properties/external_rep_id",
+            "type": "string",
+            "title": "The External_rep_id Schema",
+            "default": "",
+            "examples": ["iuser"],
+            "pattern": "^(.*)$"
+          },
+          "create_letter": {
+            "$id": "#/properties/data/items/properties/create_letter",
+            "type": "string",
+            "title": "The Create_letter Schema",
+            "default": "",
+            "examples": ["Y"],
+            "pattern": "^(.*)$"
+          },
+          "contact_salutation": {
+            "$id": "#/properties/data/items/properties/contact_salutation",
+            "type": "string",
+            "title": "The Contact_salutation Schema",
+            "default": "",
+            "examples": ["Admiral"],
+            "pattern": "^(.*)$"
+          },
+          "contact_phone1": {
+            "$id": "#/properties/data/items/properties/contact_phone1",
+            "type": "string",
+            "title": "The Contact_phone1 Schema",
+            "default": "",
+            "examples": ["333 867-5309"],
+            "pattern": "^(.*)$"
+          },
+          "contact_lastname": {
+            "$id": "#/properties/data/items/properties/contact_lastname",
+            "type": "string",
+            "title": "The Contact_lastname Schema",
+            "default": "",
+            "examples": ["Ardalan"],
+            "pattern": "^(.*)$"
+          },
+          "contact_firstname": {
+            "$id": "#/properties/data/items/properties/contact_firstname",
+            "type": "string",
+            "title": "The Contact_firstname Schema",
+            "default": "",
+            "examples": ["Bach"],
+            "pattern": "^(.*)$"
+          },
+          "contact_degree": {
+            "$id": "#/properties/data/items/properties/contact_degree",
+            "type": "string",
+            "title": "The Contact_degree Schema",
+            "default": "",
+            "examples": ["M.D."],
+            "pattern": "^(.*)$"
+          },
+          "case_source": {
+            "$id": "#/properties/data/items/properties/case_source",
+            "type": "string",
+            "title": "The Case_source Schema",
+            "default": "",
+            "examples": ["Veeva"],
+            "pattern": "^(.*)$"
+          },
+          "case_language": {
+            "$id": "#/properties/data/items/properties/case_language",
+            "type": "string",
+            "title": "The Case_language Schema",
+            "default": "",
+            "examples": ["English"],
+            "pattern": "^(.*)$"
+          },
+          "case_handling": {
+            "$id": "#/properties/data/items/properties/case_handling",
+            "type": "string",
+            "title": "The Case_handling Schema",
+            "default": "",
+            "examples": ["Phone_vod"],
+            "pattern": "^(.*)$"
+          },
+          "case_department": {
+            "$id": "#/properties/data/items/properties/case_department",
+            "type": "string",
+            "title": "The Case_department Schema",
+            "default": "",
+            "examples": ["FIELD SALES"],
+            "pattern": "^(.*)$"
+          }
+        }
+      }
+    }
+  }
+}

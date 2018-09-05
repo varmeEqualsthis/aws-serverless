@@ -1,0 +1,54 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:DescribeLogGroups",
+        "logs:DescribeLogStreams",
+        "logs:PutLogEvents",
+        "logs:GetLogEvents",
+        "logs:FilterLogEvents"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowInvokeLambdaActionsForUser",
+      "Effect": "Allow",
+      "Action": "lambda:Invoke*",
+      "Resource": ["arn:aws:lambda:*:*:function:${prefix}-*"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "states:Send*",
+        "states:List*",
+        "states:Create*",
+        "states:StopExecution"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "states:*",
+      "Resource": [
+        "arn:aws:states:*:*:activity:*",
+        "arn:aws:states:*:*:execution:${prefix}*",
+        "arn:aws:states:*:*:stateMachine:${prefix}*"
+      ]
+    },
+    {
+      "Sid": "AllowReadSSMParameterActionsForUser",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:DescribeParameters",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath"        
+      ],
+      "Resource": ["arn:aws:ssm:*:*:parameter/${prefix}-*"]
+    }    
+  ]
+}

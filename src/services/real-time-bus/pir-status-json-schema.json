@@ -1,0 +1,51 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": ["requestid", "data"],
+  "properties": {
+    "requestid": {
+      "$id": "#/properties/requestid",
+      "type": "string",
+      "title": "The Requestid Schema",
+      "default": "",
+      "examples": ["fa5e7fcd-b388-4224-a0b0-59c9d59d4e5a"],
+      "pattern": "^(.*)$"
+    },
+    "data": {
+      "$id": "#/properties/data",
+      "type": "object",
+      "title": "The Data Schema",
+      "patternProperties": {
+        "^usveeva$|^ussc$|^gersc$|^jpsc$": {
+          "type": "array",
+          "title": "The Field sales Schema",
+          "items": {
+            "type": "object",
+            "title": "The Items Schema",
+            "required": ["src_id", "pir_status_cd"],
+            "properties": {
+              "src_id": {
+                "type": "string",
+                "title": "The Src_id Schema",
+                "default": "",
+                "examples": ["a0tn0000001iHvjAAE"],
+                "pattern": "^(.*)$"
+              },
+              "pir_status_cd": {
+                "type": "string",
+                "title": "The Pir_status_cd Schema",
+                "default": "",
+                "examples": ["Approved"],
+                "pattern": "^(.*)$"
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

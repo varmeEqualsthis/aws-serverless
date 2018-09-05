@@ -1,0 +1,6 @@
+{
+  "dataPipelineName": "ce-rti-med-info-data-exchng-dev-export",
+  "hiveScript":
+    "CREATE EXTERNAL TABLE dual (x int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' NULL DEFINED AS 'NULL' LOCATION 's3n://ce-rti-med-info-dev/data-exchange/tables/dual/v12/#{format(@scheduledStartTime,'YYYYMMdd')}/'; insert into table dual select count(*)+1 as x from dual;",
+  "pipelineLogUri": "s3://ce-rti-med-info-dev/data-exchange/pipelinelogsv1/"
+}

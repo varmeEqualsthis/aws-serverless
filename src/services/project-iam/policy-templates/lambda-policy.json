@@ -1,0 +1,201 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowIamReadAccess",
+      "Action": ["iam:Get*", "iam:List*", "iam:PassRole"],
+      "Effect": "Allow",
+      "Resource": ["*"]
+    },
+
+    {
+      "Sid": "AllowTagReadAccess",
+      "Action": ["tag:Get*"],
+      "Effect": "Allow",
+      "Resource": ["*"]
+    },
+
+    {
+      "Sid": "AllowCloudWatchLogsReadAccess",
+      "Action": ["logs:Get*", "logs:Describe*", "logs:List*"],
+      "Effect": "Allow",
+      "Resource": ["*"]
+    },
+
+    {
+      "Sid": "AllowCloudWatchLogsActionsForUser",
+      "Action": [
+        "logs:Create*",
+        "logs:Put*",
+        "logs:Tag*",
+        "logs:untag*",
+        "logs:Filter*",
+        "logs:Associate*",
+        "logs:Test*"
+      ],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:logs:*:*:log-group:/aws/lambda/${prefix}-*"]
+    },
+
+    {
+      "Sid": "AllowAllS3ActionsInUserFolder",
+      "Effect": "Allow",
+      "Action": ["s3:*"],
+      "Resource": ["arn:aws:s3:::${prefix}-*"]
+    },
+
+    {
+      "Sid": "AllowCloudFormationReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:List*",
+        "cloudformation:Describe*",
+        "cloudformation:Get*",
+        "cloudformation:Preview*"
+      ],
+      "Resource": ["*"]
+    },
+
+    {
+      "Sid": "AllowCloudWatchReadAccess",
+      "Action": ["cloudwatch:Get*", "cloudwatch:Describe*", "cloudwatch:List*"],
+      "Effect": "Allow",
+      "Resource": ["*"]
+    },
+
+    {
+      "Sid": "AllowCloudWatchEventsReadAccess",
+      "Action": ["events:Describe*", "events:List*", "events:Test*"],
+      "Effect": "Allow",
+      "Resource": ["*"]
+    },
+
+    {
+      "Sid": "AllowCloudWatchEventsAccess",
+      "Action": "events:*",
+      "Effect": "Allow",
+      "Resource": ["arn:aws:events:*:*:rule/${prefix}-*"]
+    },
+
+    {
+      "Sid": "AllowLambdaSNSActionsForUser",
+      "Action": [
+        "sns:Get*",
+        "sns:List*",
+        "sns:Subscribe",
+        "sns:Unsubscribe",
+        "sns:Publish"
+      ],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:sns:*:*:${prefix}-*"]
+    },
+
+    {
+      "Sid": "AllowLambdaSQSActionsForUser",
+      "Action": [
+        "sqs:Purge*",
+        "sqs:Send*",
+        "sqs:List*",
+        "sqs:Get*",
+        "sqs:Receive*",
+        "sqs:DeleteMessage",
+        "sqs:Get*"
+      ],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:sqs:*:*:${prefix}-*"]
+    },
+
+    {
+      "Sid": "AllowLambdaReadAccess",
+      "Action": ["lambda:Get*", "lambda:List*"],
+      "Effect": "Allow",
+      "Resource": ["*"]
+    },
+
+    {
+      "Sid": "AllowAllLambdaInvokeForUser",
+      "Action": ["lambda:Invoke*"],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:lambda:*:*:function:${prefix}-*"]
+    },
+
+    {
+      "Sid": "AllowDynamodbReadAccess",
+      "Action": ["dynamodb:Describe*", "dynamodb:List*"],
+      "Effect": "Allow",
+      "Resource": ["*"]
+    },
+
+    {
+      "Sid": "AllowAllDynamodbActionsForUser",
+      "Action": [
+        "dynamodb:Query*",
+        "dynamodb:DeleteItem",
+        "dynamodb:Get*",
+        "dynamodb:Batch*",
+        "dynamodb:UpdateItem",
+        "dynamodb:Scan",
+        "dynamodb:PutItem"
+      ],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:dynamodb:*:*:table/${prefix}-*"]
+    },
+
+    {
+      "Sid": "AllowExecuteAndReadStatesActionsForUser",
+      "Action": [
+        "states:Describe*",
+        "states:Get*",
+        "states:List*",
+        "states:Start*"
+      ],
+      "Effect": "Allow",
+      "Resource": ["arn:aws:states:*:*:*:${prefix}*"]
+    },
+    {
+      "Sid": "AllowKinesisReadAccess",
+      "Effect": "Allow",
+      "Action": ["kinesis:List*", "kinesis:Describe*", "kinesis:Get*"],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "AllowReadPutKinesisActionsForUser",
+      "Effect": "Allow",
+      "Action": ["kinesis:Describe*", "kinesis:Get*", "kinesis:List*", "kinesis:Put*"],
+      "Resource": ["arn:aws:kinesis:*:*:stream/${prefix}-*"]
+    },
+    {
+      "Sid": "AllowReadSSMParameterActionsForUser",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:DescribeParameters",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath"        
+      ],
+      "Resource": ["arn:aws:ssm:*:*:parameter/${prefix}-*"]
+    },
+    {
+      "Sid": "AllowDataPipelineReadAccess",
+      "Effect": "Allow",
+      "Action": [
+        "datapipeline:Describe*",
+        "datapipeline:List*",
+        "datapipeline:Get*",
+        "datapipeline:Query*",
+        "datapipeline:Evaluate*",
+        "datapipeline:Poll*",
+        "datapipeline:Report*",
+        "datapipeline:Validate*"
+      ],
+      "Resource": ["*"]
+    },
+    {
+      "Sid": "AllowDataPipelineActivateForUser",
+      "Effect": "Allow",
+      "Action": ["datapipeline:ActivatePipeline"],
+      "Resource": ["*"]
+    }    
+
+  ]
+}

@@ -1,0 +1,297 @@
+service: ${self:custom.prefix}-med-info-rtb
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  memorySize: 128
+  stage: ${opt:stage, self:custom.defaultStage}
+  role: ${file(../../resources/provider.js):project.lambdaRole}
+  apiKeys:
+    - ${self:custom.pre}
+  environment:
+    stage: ${self:provider.stage}
+    VEEVA_INBOUND_TOPIC_NAME: ${self:custom.veevaInboundTopicName}
+    VEEVA_INBOUND_TOPIC_ARN: ${self:custom.veevaInboundTopicArn}
+    IRMS_OUTBOUND_TOPIC_NAME: ${self:custom.irmsOutboundTopicName}
+    IRMS_OUTBOUND_TOPIC_ARN: ${self:custom.irmsOutboundTopicArn}    
+    PROCESS_PIR_FROM_VEEVA_STEP_FN_ARN: ${self:custom.processPirFromVeevaStepFnArn}
+    IRMS_DLQ_URL: ${self:custom.irmsDLQURL}
+    ALL_EVENTS_STREAM_NAME: ${self:custom.allEventsStreamName}
+    ALL_EVENTS_STREAM_ARN: ${self:custom.allEventsStreamArn}
+  stackTags: ${file(../../resources/standard-tags.yml)}
+
+plugins:  
+  - serverless-webpack
+  - serverless-pseudo-parameters
+  - serverless-step-functions
+
+custom:
+  defaultStage: dev2
+  pre: ${self:service}-${self:provider.stage}
+  prefix: ${file(../../resources/provider.js):project.prefix}
+
+  serviceBucketName: ${self:custom.pre}
+  serviceBucketArn: arn:aws:s3:::${self:custom.serviceBucketName}
+  
+  dynamodbTableName : ${self:custom.pre}-transform-pir-lookup
+  dynamodbTableArn : arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:${self:custom.dynamodbTableName}
+
+  veevaInboundTopicName: ${self:custom.pre}-inbound-veeva
+  veevaInboundTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.veevaInboundTopicName}
+  irmsOutboundTopicName: ${self:custom.pre}-outbound-irms
+  irmsOutboundTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.irmsOutboundTopicName}
+
+  irmsDLQTopicName: ${self:custom.pre}-dlq-irms
+  irmsDLQTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.irmsDLQTopicName}  
+  irmsDLQName: ${self:custom.pre}-dlq-irms
+  irmsDLQArn: arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:custom.irmsDLQName}
+  irmsDLQURL: https://sqs.#{AWS::Region}.amazonaws.com/#{AWS::AccountId}/${self:custom.irmsDLQName}
+
+  veevaDLQTopicName: ${self:custom.pre}-dlq-veeva
+  veevaDLQTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.veevaDLQTopicName}  
+  veevaDLQName: ${self:custom.pre}-dlq-veeva
+  veevaDLQArn: arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:custom.veevaDLQName}
+
+  tranformPirFunctionName: ${self:custom.pre}-transform-pir
+  tranformPirFunctionArn: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:custom.tranformPirFunctionName}
+  enrichPirFunctionName: ${self:custom.pre}-enrich-pir
+  enrichPirFunctionArn: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:custom.enrichPirFunctionName}
+  publishPirToIRMSName: ${self:custom.pre}-publish-pir-to-irms
+  publishPirToIRMSArn: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:custom.publishPirToIRMSName}  
+  processPirFromVeevaStepFnName: ${self:custom.pre}-process-pir-from-veeva
+  processPirFromVeevaStepFnArn: arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:${self:custom.processPirFromVeevaStepFnName}
+
+  allEventsStreamName: ${self:custom.pre}-all-events
+  allEventsStreamArn:  arn:aws:kinesis:#{AWS::Region}:#{AWS::AccountId}:stream/${self:custom.allEventsStreamName}
+
+  allEventsToS3DeliveryStreamName: ${self:custom.pre}-all-events-to-s3
+  allEventsToS3DeliveryStreamArn:  arn:aws:firehose:#{AWS::Region}:#{AWS::AccountId}:deliverystream/${self:custom.allEventsToS3DeliveryStreamName}
+  allEventsToS3DeliveryStreamRoleName: ${self:custom.prefix}-firehose-role
+  allEventsToS3DeliveryStreamRoleArn: arn:aws:iam::#{AWS::AccountId}:role/${self:custom.allEventsToS3DeliveryStreamRoleName}
+  
+
+functions:
+  vvaPir:
+    handler: handler.veevaPIR
+    package:
+      include: pirschema.json
+    events:
+      - http:
+          path: pir
+          method: post
+          private: true
+          request:
+            parameters:
+              headers:
+                requestid:  true
+                division: true
+                source-type:  true
+                source-department:  true
+                source-language:  true
+                source-system:  true
+            
+  allEventsStreamHandler:
+    handler: handler.allEventsStreamHandler
+    events:
+      - stream:
+          type: kinesis
+          arn: ${self:custom.allEventsStreamArn}
+
+  snsInboundVeeva:
+    handler: handler.snsInboundVeeva
+    events:
+      - sns: ${self:custom.veevaInboundTopicName}
+
+  tranformPir:
+    handler: handler.tranformPir
+    name: ${self:custom.tranformPirFunctionName}
+
+  enrichPir:
+    handler: handler.enrichPir
+    name: ${self:custom.enrichPirFunctionName}
+
+  publishPirToIRMS:
+    handler: handler.publishPirToIRMS
+    name: ${self:custom.publishPirToIRMSName}
+        
+  snsOutboundIrms:
+    handler: handler.snsOutboundIrms
+    onError: ${self:custom.irmsDLQTopicArn}
+    events:
+      - sns: ${self:custom.irmsOutboundTopicName}
+   
+  processIrmsDLQ:
+    handler: handler.processIrmsDLQ
+    events:
+      - schedule:
+          rate: rate(1 minute)    
+
+stepFunctions:
+  stateMachines:
+    cfaProcessPirFromVeeva:
+      role: ${file(../../resources/provider.js):project.stepfunctionRole}
+      name: ${self:custom.processPirFromVeevaStepFnName}
+      definition:
+        Comment: "processPirFromVeeva"
+        StartAt: TransformPir
+        States:
+          TransformPir:
+            Type: Task
+            Resource: ${self:custom.tranformPirFunctionArn}
+            InputPath: "$"
+            ResultPath: "$"
+            OutputPath: "$"
+            Next: EnrichPir
+          EnrichPir:
+            Type: Task
+            Resource: ${self:custom.enrichPirFunctionArn}
+            InputPath: "$"
+            ResultPath: "$"
+            OutputPath: "$"
+            Next: publishPirToIRMS
+          publishPirToIRMS:
+            Type: Task
+            Resource: ${self:custom.publishPirToIRMSArn}
+            InputPath: "$"
+            ResultPath: "$"
+            OutputPath: "$"
+            End: true
+  
+
+resources:
+  Resources:
+
+    ServiceBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.serviceBucketName}
+    
+    DynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.dynamodbTableName}    
+
+    VeevaDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.veevaDLQName}
+    VeevaDLQQueuePolicy:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: SQSQueuePolicy
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: sqs:*
+            Resource: "*"
+        Queues:
+          - Ref: VeevaDLQ
+    VeevaDLQTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:custom.veevaDLQTopicName}
+    VeevaDLQTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: SnsTopicPolicy
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sns:Publish
+            Resource: "*"
+        Topics:
+          - Ref: VeevaDLQTopic          
+    VeevaDLQSNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: ${self:custom.veevaDLQArn}
+        Protocol: sqs
+        TopicArn: ${self:custom.veevaDLQTopicArn}
+      DependsOn:
+        - VeevaDLQTopic
+        - VeevaDLQ
+          
+    IRMSDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.irmsDLQName}
+    IRMSDLQQueuePolicy:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: SQSQueuePolicy
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: sqs:*
+            Resource: "*"
+        Queues:
+          - Ref: IRMSDLQ
+    IRMSDLQTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:custom.irmsDLQTopicName}
+    IRMSDLQTopicPolicy:
+      Type: AWS::SNS::TopicPolicy
+      Properties:
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: SnsTopicPolicy
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sns:Publish
+            Resource: "*"
+        Topics:
+          - Ref: IRMSDLQTopic          
+    IRMSDLQSNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: ${self:custom.irmsDLQArn}
+        Protocol: sqs
+        TopicArn: ${self:custom.irmsDLQTopicArn}
+      DependsOn:
+        - IRMSDLQTopic
+        - IRMSDLQ
+
+    AllEventsStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: ${self:custom.allEventsStreamName}
+        ShardCount: 1
+
+    AllEventsToS3DeliveryStream:
+      Type: AWS::KinesisFirehose::DeliveryStream
+      Properties:
+        DeliveryStreamName: ${self:custom.allEventsToS3DeliveryStreamName}
+        DeliveryStreamType: KinesisStreamAsSource
+        KinesisStreamSourceConfiguration: 
+          KinesisStreamARN: ${self:custom.allEventsStreamArn}
+          RoleARN: ${self:custom.allEventsToS3DeliveryStreamRoleArn}
+        ExtendedS3DestinationConfiguration:
+          BucketARN: ${self:custom.serviceBucketArn}
+          BufferingHints:
+            IntervalInSeconds: 60
+            SizeInMBs: 50
+          CompressionFormat: UNCOMPRESSED
+          Prefix: ${self:custom.allEventsToS3DeliveryStreamName}/
+          RoleARN: ${self:custom.allEventsToS3DeliveryStreamRoleArn}
+          ProcessingConfiguration:
+            Enabled: false              
+      DependsOn:
+        - AllEventsStream
+        - ServiceBucket
+    
+    AllEventsStreamHandlerEventSourceMappingKinesisCertimedinfortbdev2allevents:
+      Type: AWS::Lambda::EventSourceMapping
+      DependsOn:
+        - AllEventsStream

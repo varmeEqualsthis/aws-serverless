@@ -1,0 +1,53 @@
+{
+  "objects": [
+    {
+      "resourceRole": "ce-rti-datapipeline-resource-role",
+      "role": "ce-rti-datapipeline-role",
+      "name": "EmrClusterForHiveScript",
+      "coreInstanceCount": "1",
+      "coreInstanceType": "m3.xlarge",
+      "keyPair": "brianpfeil",
+      "masterInstanceType": "m3.xlarge",
+      "id": "EmrClusterForHiveScript",
+      "releaseLabel": "emr-5.10.0",
+      "region": "us-east-1",
+      "type": "EmrCluster",
+      "terminateAfter": "1 Hours"
+    },
+    {
+      "type": "Default",
+      "failureAndRerunMode": "CASCADE",
+      "maxActiveInstances": "5",      
+      "resourceRole": "ce-rti-datapipeline-resource-role",
+      "pipelineLogUri": "#{myPipelineLogUri}",
+      "role": "ce-rti-datapipeline-role",
+      "scheduleType": "ONDEMAND",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "stage": "false",
+      "hiveScript": "#{myHiveScript}",
+      "name": "RunHiveScript",
+      "id": "HiveActivityId_X1rKv",
+      "runsOn": {
+        "ref": "EmrClusterForHiveScript"
+      },
+      "type": "HiveActivity"
+    }
+  ],
+  "parameters": [
+    {
+      "default": "CREATE EXTERNAL TABLE dual (x int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' NULL DEFINED AS 'NULL' LOCATION 's3n://ce-rti-med-info-dev/data-exchange/tables/dual/#{format(@scheduledStartTime,'YYYYMMdd')}/'; insert into table dual select count(*)+1 as x from dual;",
+      "description": "Hive script to run",
+      "id": "myHiveScript",
+      "type": "String"
+    },
+    {
+      "default": "s3://com.brianpfeil.pipeline-scratch01/data-exchange/logs/",
+      "description": "pipelineLogUri",
+      "id": "myPipelineLogUri",
+      "type": "String"
+    }    
+  ]
+}

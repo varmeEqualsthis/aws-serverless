@@ -1,0 +1,35 @@
+{
+  "name": "aws-iam-playground",
+  "version": "1.0.0",
+  "description": "`serverless-project-policy-templates/` - serverless project policy templates for the various roles (admin, support, lambda, apigateway).  they aim to isolate permissions by matching resources against a project prefix",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pfeilbr/aws-iam-playground.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pfeilbr/aws-iam-playground/issues"
+  },
+  "homepage": "https://github.com/pfeilbr/aws-iam-playground#readme",
+  "dependencies": {
+    "@types/bluebird": "^3.5.20",
+    "@types/lodash": "^4.14.102",
+    "@types/node": "^4.0.36",
+    "@types/request-promise": "^4.1.41",
+    "aws-sdk": "^2.190.0",
+    "bluebird": "^3.5.1",
+    "lodash": "^4.17.5",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2"
+  },
+  "devDependencies": {
+    "tslint": "^5.9.1",
+    "typescript": "^2.7.1"
+  }
+}

@@ -1,0 +1,285 @@
+service: ${self:custom.prefix}-med-info-iam-rtb
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  memorySize: 128
+  stage: ${opt:stage, self:custom.defaultStage}
+  role: ${file(../../resources/provider.js):project.lambdaRole}
+  apiKeys:
+    - ${self:custom.pre}
+  environment:
+    stage: ${self:provider.stage}
+  stackTags: ${file(../../resources/standard-tags.yml)}
+
+plugins:
+  - serverless-pseudo-parameters
+
+custom:
+  defaultStage: dev
+  pre: ${self:service}-${self:provider.stage}
+  prefix: ${file(../../resources/provider.js):project.prefix}
+  
+functions:
+
+resources:
+  Resources:
+
+    ProjectAdminRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-admin-role
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSSupportAccess
+          - arn:aws:iam::aws:policy/SecurityAudit
+          - arn:aws:iam::aws:policy/CloudWatchEventsReadOnlyAccess
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - 
+              Effect: "Allow"
+              Principal: 
+                AWS: arn:aws:iam::#{AWS::AccountId}:root 
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectAdminPolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-admin-policy
+        Roles:
+          - Ref: ProjectAdminRole
+        PolicyDocument: ${file(./variables.js):policies.admin-policy}
+
+    ProjectSupportRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-support-role
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSSupportAccess
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - 
+              Effect: "Allow"
+              Principal: 
+                AWS: arn:aws:iam::#{AWS::AccountId}:root 
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectSupportPolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-support-policy
+        Roles:
+          - Ref: ProjectSupportRole
+        PolicyDocument: ${file(./variables.js):policies.support-policy}
+    
+
+    ProjectLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-lambda-role
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - 
+              Effect: "Allow"
+              Principal: 
+                Service: lambda.amazonaws.com
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectLambdaPolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-lambda-policy
+        Roles:
+          - Ref: ProjectLambdaRole
+        PolicyDocument: ${file(./variables.js):policies.lambda-policy}
+
+    ProjectStepfunctionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-stepfunction-role
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - 
+              Effect: "Allow"
+              Principal: 
+                Service: states.amazonaws.com
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectStepfunctionPolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-stepfunction-policy
+        Roles:
+          - Ref: ProjectStepfunctionRole
+        PolicyDocument: ${file(./variables.js):policies.stepfunction-policy}
+
+    ProjectFirehoseRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-firehose-role
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - 
+              Effect: "Allow"
+              Principal: 
+                Service: firehose.amazonaws.com
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectFirehosePolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-firehose-policy
+        Roles:
+          - Ref: ProjectFirehoseRole
+        PolicyDocument: ${file(./variables.js):policies.firehose-policy}
+
+    ProjectApiGatewayRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-api-gateway-role
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - 
+              Effect: "Allow"
+              Principal: 
+                Service: apigateway.amazonaws.com
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectApiGatewayPolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-api-gateway-policy
+        Roles:
+          - Ref: ProjectApiGatewayRole
+        PolicyDocument: ${file(./variables.js):policies.api-gateway-policy}
+
+    ProjectDataPipelineRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-datapipeline-role
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSDataPipelineRole
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - 
+              Effect: "Allow"
+              Principal: 
+                Service:
+                  - datapipeline.amazonaws.com
+                  - elasticmapreduce.amazonaws.com
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectDataPipelinePolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-datapipeline-policy
+        Roles:
+          - Ref: ProjectDataPipelineRole
+        PolicyDocument: ${file(./variables.js):policies.datapipeline-policy}        
+
+    ProjectDataPipelineResourceRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-datapipeline-resource-role
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforDataPipelineRole
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - 
+              Effect: "Allow"
+              Principal: 
+                Service:
+                  - ec2.amazonaws.com
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectDataPipelineResourcePolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-datapipeline-resource-policy
+        Roles:
+          - Ref: ProjectDataPipelineResourceRole
+        PolicyDocument: ${file(./variables.js):policies.datapipeline-resource-policy}
+
+    ProjectDataPinelineResourceInstanceProfile:
+      Type: AWS::IAM::InstanceProfile
+      Properties:
+        InstanceProfileName: ${self:custom.prefix}-datapipeline-resource-role
+        Path: "/"
+        Roles:
+          - Ref: ProjectDataPipelineResourceRole
+
+    ProjectEmrRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-emr-role
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement: 
+            - 
+              Effect: "Allow"
+              Principal: 
+                Service:
+                  - elasticmapreduce.amazonaws.com
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectEmrPolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-emr-policy
+        Roles:
+          - Ref: ProjectEmrRole
+        PolicyDocument: ${file(./variables.js):policies.emr-policy}
+
+    ProjectEmrEc2Role:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:custom.prefix}-emr-ec2-role
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role
+        AssumeRolePolicyDocument: 
+          Version: "2008-10-17"
+          Statement: 
+            - 
+              Sid: ""
+              Effect: "Allow"
+              Principal: 
+                Service:
+                  - ec2.amazonaws.com
+              Action: 
+                - "sts:AssumeRole"
+        Path: "/"
+
+    ProjectEmrEc2Policy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:custom.prefix}-emr-ec2-policy
+        Roles:
+          - Ref: ProjectEmrEc2Role
+        PolicyDocument: ${file(./variables.js):policies.emr-ec2-policy}     

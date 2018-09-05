@@ -1,0 +1,53 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "states:List*",
+                "logs:Describe*",
+                "logs:List*",
+                "logs:GetLogEvents",
+                "dynamodb:List*",
+                "logs:TestMetricFilter",
+                "logs:FilterLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:BatchGetItem",
+                "states:Get*",
+                "dynamodb:Get*",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "states:Describe*"
+            ],
+            "Resource": [
+                "arn:aws:dynamodb:*:*:table/${prefix}*",
+                "arn:aws:states:*:*:execution:${prefix}*:*",
+                "arn:aws:states:*:*:activity:${prefix}*",
+                "arn:aws:states:*:*:stateMachine:${prefix}*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": "dynamodb:Describe*",
+            "Resource": [
+                "arn:aws:dynamodb:*:*:table/${prefix}*"
+            ]
+        },
+        {
+            "Sid": "AllowReadSSMParameterActionsForUser",
+            "Effect": "Allow",
+            "Action": [
+              "ssm:DescribeParameters",
+              "ssm:GetParameter",
+              "ssm:GetParameters",
+              "ssm:GetParametersByPath"        
+            ],
+            "Resource": ["arn:aws:ssm:*:*:parameter/${prefix}-*"]
+          }            
+    ]
+}

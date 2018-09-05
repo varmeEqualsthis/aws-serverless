@@ -1,0 +1,25 @@
+{
+  "data": [
+    {
+      "send_email": "Y",
+      "req_date_utc": "2018-08-12T11:30:00.000Z",
+      "rep_lastname": "User",
+      "rep_firstname": "Integration",
+      "question_product_code": "GARDASIL",
+      "question": "test request updated",
+      "pir_status_code": "TRANSFERRED",
+      "external_req_id": "a0tq0000003FiDTAA0",
+      "external_rep_id": "iuser",
+      "create_letter": "Y",
+      "contact_salutation": "Admiral",
+      "contact_phone1": "333 867-5309",
+      "contact_lastname": "Ardalan",
+      "contact_firstname": "Bach",
+      "contact_degree": "M.D.",
+      "case_source": "Veeva",
+      "case_language": "English",
+      "case_handling": "Phone_vod",
+      "case_department": "FIELD SALES"
+    }
+  ]
+}

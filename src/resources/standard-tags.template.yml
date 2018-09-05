@@ -1,0 +1,8 @@
+# rename to standard-tags.yml and populate with your values
+Name: Real-time-bus
+Application: Real-time-bus
+Environment: Development
+Costcenter: "11111111"
+NetworkActivityCodes: "1111111"
+Division: Personal
+Consumer: "ramesh.elapakurthi@gmail.com"

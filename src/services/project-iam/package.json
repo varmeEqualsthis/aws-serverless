@@ -1,0 +1,21 @@
+{
+  "name": "project-iam",
+  "version": "1.0.0",
+  "description": "",
+  "main": "variables.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "create-iam-cf-template": "AWS_PROFILE=admin sls package && node scripts/create-cf-stack.js",
+    "get-console-login-url-for-role": "AWS_PROFILE=admin aws-env get-console-login-url-for-role --",
+    "as-project-admin": "AWS_PROFILE=admin aws-env execute-command-as-project-admin",
+    "info": "npm run as-project-admin -- 'sls info --verbose'",
+    "deploy": "npm run as-project-admin -- 'sls deploy --verbose'",
+    "remove": "npm run as-project-admin -- 'sls remove --verbose'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "aws-env": "github:pfeilbr/aws-env"
+  }
+}
