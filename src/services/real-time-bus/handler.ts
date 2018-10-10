@@ -1,46 +1,82 @@
+import { APIGatewayEvent, Callback, Context, Handler } from "aws-lambda";
 import * as AWS from "aws-sdk";
 import * as log from "./lib/log";
-//import * as ajv from "ajv";
+import * as ajv from "ajv";
+import * as jsf from "jsforce";
 
-export const veevaPIR = async (event, context, callback) => {
+export const veevaPIR = async (
+  event: APIGatewayEvent,
+  context: Context,
+  cb: Callback
+) => {
   log.info(`received pir from veeva inbound api endpoint`, { event });
 
   try {
-    const kinesis = new AWS.Kinesis();
-    const params = {
-      StreamName: process.env.ALL_EVENTS_STREAM_NAME,
-      PartitionKey: "cfa",
-      Data: event.body
-    };
+    //const kinesis = new AWS.Kinesis();
+    // const params = {
+    //   StreamName: process.env.ALL_EVENTS_STREAM_NAME,
+    //   PartitionKey: "cfa",
+    //   Data: event
+    // };
 
     log.info(`validating pir message.`);
+    //const jsf = require("jsforce");
 
-    const isValidPir = await validPIR(event.body);
-    if (!isValidPir) {
-      log.error("invalid PIR.");
-      throw "invalid PIR data";
-    }
-
-    log.info(`publishing pir to all events stream`, { params });
-
-    const putRecordResp = await kinesis.putRecord(params).promise();
-
-    log.info(`published pir to all events stream`, { params });
-
-    const response = {
-      body: JSON.stringify(putRecordResp, null, 2),
-      statusCode: 200
-    };
-    callback(null, response);
-  } catch (e) {
-    log.error("error publishing pir to all events stream", {
-      error: JSON.stringify(e, Object.getOwnPropertyNames(e))
+    const jsfConn = new jsf.Connection({
+      oauth2: {
+        loginUrl: "https://test.salesforce.com",
+        clientId:
+          "3MVG9zZht._ZaMunIw02Zmy.qM8Q3xMYMlER6B_4RchwkAlQKPFzGKwDRCOLFTIr8IS3wfrIKyg3zCYKSkIux",
+        clientSecret: "1959802284468702395",
+        redirectUri: "https://localhost/oauth/callback"
+      }
     });
+
+    const username = "integration1@merck.com.hhusd15";
+    const password = "Mrkp@ssw0rd007nNllg3oANNCUePPUrs3FklnSL";
+
+    jsfConn.login(username, password, function(err, userInfo) {
+      if (err) {
+        return console.error(err);
+      }
+      // Now you can get the access token and instance URL information.
+      // Save them to establish connection next time.
+      console.log(jsfConn.accessToken);
+      console.log(jsfConn.instanceUrl);
+      // logged in user property
+      console.log("User ID: " + userInfo.id);
+      console.log("Org ID: " + userInfo.organizationId);
+      const response = {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "connected to salesforce successfully!",
+          input: userInfo
+        })
+      };
+      cb(null, response);
+    });
+
+    // const isValidPir = await validPIR(event.body);
+    // if (!isValidPir) {
+    //   log.error("invalid PIR.");
+    //   throw "invalid PIR data";
+    // }
+
+    //log.info(`publishing pir to all events stream`, { params });
+
+    //const putRecordResp = await kinesis.putRecord(params).promise();
+
+    // log.info(`published pir to all events stream`, { params });
+  } catch (e) {
+    log.error("error publishing pir to all events stream", { e });
+    //   error: JSON.stringify(e, Object.getOwnPropertyNames(e))
+    // });
+
     const errorResponse = {
-      body: JSON.stringify(e, Object.getOwnPropertyNames(e)),
+      body: "error connecting sfdc",
       statusCode: 500
     };
-    callback(errorResponse);
+    cb(null, errorResponse);
   }
 };
 

@@ -13,14 +13,13 @@ provider:
     VEEVA_INBOUND_TOPIC_NAME: ${self:custom.veevaInboundTopicName}
     VEEVA_INBOUND_TOPIC_ARN: ${self:custom.veevaInboundTopicArn}
     IRMS_OUTBOUND_TOPIC_NAME: ${self:custom.irmsOutboundTopicName}
-    IRMS_OUTBOUND_TOPIC_ARN: ${self:custom.irmsOutboundTopicArn}    
+    IRMS_OUTBOUND_TOPIC_ARN: ${self:custom.irmsOutboundTopicArn}
     PROCESS_PIR_FROM_VEEVA_STEP_FN_ARN: ${self:custom.processPirFromVeevaStepFnArn}
     IRMS_DLQ_URL: ${self:custom.irmsDLQURL}
     ALL_EVENTS_STREAM_NAME: ${self:custom.allEventsStreamName}
     ALL_EVENTS_STREAM_ARN: ${self:custom.allEventsStreamArn}
-  stackTags: ${file(../../resources/standard-tags.yml)}
 
-plugins:  
+plugins:
   - serverless-webpack
   - serverless-pseudo-parameters
   - serverless-step-functions
@@ -32,9 +31,9 @@ custom:
 
   serviceBucketName: ${self:custom.pre}
   serviceBucketArn: arn:aws:s3:::${self:custom.serviceBucketName}
-  
-  dynamodbTableName : ${self:custom.pre}-transform-pir-lookup
-  dynamodbTableArn : arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:${self:custom.dynamodbTableName}
+
+  dynamodbTableName: ${self:custom.pre}-transform-pir-lookup
+  dynamodbTableArn: arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:${self:custom.dynamodbTableName}
 
   veevaInboundTopicName: ${self:custom.pre}-inbound-veeva
   veevaInboundTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.veevaInboundTopicName}
@@ -42,13 +41,13 @@ custom:
   irmsOutboundTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.irmsOutboundTopicName}
 
   irmsDLQTopicName: ${self:custom.pre}-dlq-irms
-  irmsDLQTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.irmsDLQTopicName}  
+  irmsDLQTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.irmsDLQTopicName}
   irmsDLQName: ${self:custom.pre}-dlq-irms
   irmsDLQArn: arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:custom.irmsDLQName}
   irmsDLQURL: https://sqs.#{AWS::Region}.amazonaws.com/#{AWS::AccountId}/${self:custom.irmsDLQName}
 
   veevaDLQTopicName: ${self:custom.pre}-dlq-veeva
-  veevaDLQTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.veevaDLQTopicName}  
+  veevaDLQTopicArn: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:${self:custom.veevaDLQTopicName}
   veevaDLQName: ${self:custom.pre}-dlq-veeva
   veevaDLQArn: arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:custom.veevaDLQName}
 
@@ -57,22 +56,22 @@ custom:
   enrichPirFunctionName: ${self:custom.pre}-enrich-pir
   enrichPirFunctionArn: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:custom.enrichPirFunctionName}
   publishPirToIRMSName: ${self:custom.pre}-publish-pir-to-irms
-  publishPirToIRMSArn: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:custom.publishPirToIRMSName}  
+  publishPirToIRMSArn: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:custom.publishPirToIRMSName}
   processPirFromVeevaStepFnName: ${self:custom.pre}-process-pir-from-veeva
   processPirFromVeevaStepFnArn: arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:${self:custom.processPirFromVeevaStepFnName}
 
   allEventsStreamName: ${self:custom.pre}-all-events
-  allEventsStreamArn:  arn:aws:kinesis:#{AWS::Region}:#{AWS::AccountId}:stream/${self:custom.allEventsStreamName}
+  allEventsStreamArn: arn:aws:kinesis:#{AWS::Region}:#{AWS::AccountId}:stream/${self:custom.allEventsStreamName}
 
   allEventsToS3DeliveryStreamName: ${self:custom.pre}-all-events-to-s3
-  allEventsToS3DeliveryStreamArn:  arn:aws:firehose:#{AWS::Region}:#{AWS::AccountId}:deliverystream/${self:custom.allEventsToS3DeliveryStreamName}
+  allEventsToS3DeliveryStreamArn: arn:aws:firehose:#{AWS::Region}:#{AWS::AccountId}:deliverystream/${self:custom.allEventsToS3DeliveryStreamName}
   allEventsToS3DeliveryStreamRoleName: ${self:custom.prefix}-firehose-role
   allEventsToS3DeliveryStreamRoleArn: arn:aws:iam::#{AWS::AccountId}:role/${self:custom.allEventsToS3DeliveryStreamRoleName}
-  
 
 functions:
   vvaPir:
     handler: handler.veevaPIR
+    timeout: 10 # optional, in seconds, default is 6
     package:
       include: pirschema.json
     events:
@@ -83,13 +82,13 @@ functions:
           request:
             parameters:
               headers:
-                requestid:  true
+                requestid: true
                 division: true
-                source-type:  true
-                source-department:  true
-                source-language:  true
-                source-system:  true
-            
+                source-type: true
+                source-department: true
+                source-language: true
+                source-system: true
+
   allEventsStreamHandler:
     handler: handler.allEventsStreamHandler
     events:
@@ -113,18 +112,18 @@ functions:
   publishPirToIRMS:
     handler: handler.publishPirToIRMS
     name: ${self:custom.publishPirToIRMSName}
-        
+
   snsOutboundIrms:
     handler: handler.snsOutboundIrms
     onError: ${self:custom.irmsDLQTopicArn}
     events:
       - sns: ${self:custom.irmsOutboundTopicName}
-   
+
   processIrmsDLQ:
     handler: handler.processIrmsDLQ
     events:
       - schedule:
-          rate: rate(1 minute)    
+          rate: rate(1 minute)
 
 stepFunctions:
   stateMachines:
@@ -156,20 +155,13 @@ stepFunctions:
             ResultPath: "$"
             OutputPath: "$"
             End: true
-  
 
 resources:
   Resources:
-
     ServiceBucket:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: ${self:custom.serviceBucketName}
-    
-    DynamoDbTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:custom.dynamodbTableName}    
 
     VeevaDLQ:
       Type: AWS::SQS::Queue
@@ -179,14 +171,14 @@ resources:
       Type: AWS::SQS::QueuePolicy
       Properties:
         PolicyDocument:
-          Version: '2012-10-17'
+          Version: "2012-10-17"
           Statement:
-          - Sid: SQSQueuePolicy
-            Effect: Allow
-            Principal:
-              AWS: "*"
-            Action: sqs:*
-            Resource: "*"
+            - Sid: SQSQueuePolicy
+              Effect: Allow
+              Principal:
+                AWS: "*"
+              Action: sqs:*
+              Resource: "*"
         Queues:
           - Ref: VeevaDLQ
     VeevaDLQTopic:
@@ -197,16 +189,16 @@ resources:
       Type: AWS::SNS::TopicPolicy
       Properties:
         PolicyDocument:
-          Version: '2012-10-17'
+          Version: "2012-10-17"
           Statement:
-          - Sid: SnsTopicPolicy
-            Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sns:Publish
-            Resource: "*"
+            - Sid: SnsTopicPolicy
+              Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sns:Publish
+              Resource: "*"
         Topics:
-          - Ref: VeevaDLQTopic          
+          - Ref: VeevaDLQTopic
     VeevaDLQSNSSubscription:
       Type: AWS::SNS::Subscription
       Properties:
@@ -216,7 +208,7 @@ resources:
       DependsOn:
         - VeevaDLQTopic
         - VeevaDLQ
-          
+
     IRMSDLQ:
       Type: AWS::SQS::Queue
       Properties:
@@ -225,14 +217,14 @@ resources:
       Type: AWS::SQS::QueuePolicy
       Properties:
         PolicyDocument:
-          Version: '2012-10-17'
+          Version: "2012-10-17"
           Statement:
-          - Sid: SQSQueuePolicy
-            Effect: Allow
-            Principal:
-              AWS: "*"
-            Action: sqs:*
-            Resource: "*"
+            - Sid: SQSQueuePolicy
+              Effect: Allow
+              Principal:
+                AWS: "*"
+              Action: sqs:*
+              Resource: "*"
         Queues:
           - Ref: IRMSDLQ
     IRMSDLQTopic:
@@ -243,16 +235,16 @@ resources:
       Type: AWS::SNS::TopicPolicy
       Properties:
         PolicyDocument:
-          Version: '2012-10-17'
+          Version: "2012-10-17"
           Statement:
-          - Sid: SnsTopicPolicy
-            Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sns:Publish
-            Resource: "*"
+            - Sid: SnsTopicPolicy
+              Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sns:Publish
+              Resource: "*"
         Topics:
-          - Ref: IRMSDLQTopic          
+          - Ref: IRMSDLQTopic
     IRMSDLQSNSSubscription:
       Type: AWS::SNS::Subscription
       Properties:
@@ -274,7 +266,7 @@ resources:
       Properties:
         DeliveryStreamName: ${self:custom.allEventsToS3DeliveryStreamName}
         DeliveryStreamType: KinesisStreamAsSource
-        KinesisStreamSourceConfiguration: 
+        KinesisStreamSourceConfiguration:
           KinesisStreamARN: ${self:custom.allEventsStreamArn}
           RoleARN: ${self:custom.allEventsToS3DeliveryStreamRoleArn}
         ExtendedS3DestinationConfiguration:
@@ -286,11 +278,11 @@ resources:
           Prefix: ${self:custom.allEventsToS3DeliveryStreamName}/
           RoleARN: ${self:custom.allEventsToS3DeliveryStreamRoleArn}
           ProcessingConfiguration:
-            Enabled: false              
+            Enabled: false
       DependsOn:
         - AllEventsStream
         - ServiceBucket
-    
+
     AllEventsStreamHandlerEventSourceMappingKinesisCertimedinfortbdev2allevents:
       Type: AWS::Lambda::EventSourceMapping
       DependsOn:
